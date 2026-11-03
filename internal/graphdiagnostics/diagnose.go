@@ -75,7 +75,7 @@ func path(raw []byte, msg string) string {
 		if m[3] != "" {
 			s += "." + m[3]
 		}
-		if strings.Contains(msg, "missing field ") || strings.Contains(msg, "null field ") {
+		if strings.Contains(msg, "missing field ") || strings.Contains(msg, "null field ") || strings.Contains(msg, "undeclared or case-aliased JSON field ") {
 			q := quote.FindStringSubmatch(msg)
 			if q != nil {
 				s += "." + q[1]
@@ -99,17 +99,27 @@ func path(raw []byte, msg string) string {
 			for _, it := range []struct{ prefix, field string }{
 				{"duplicate node ", "id"}, {"bad ordinal ", "order"},
 				{"invalid node identifier ", "id"}, {"dangling parent of ", "parent_id"},
-				{"invalid source provenance fields ", "source_digest_claim"},
+				{"invalid source provenance fields ", ""},
 				{"node ", "parent_id"},
 			} {
 				if strings.HasPrefix(msg, it.prefix) {
-					ix := -1
+					if it.prefix == "node " && !strings.HasSuffix(msg, " self-parent") {
+						continue
+					}
+					ix, matches := -1, 0
 					for i, n := range graph.Nodes {
 						if n.ID == q[1] {
 							ix = i
+							matches++
+							if it.prefix == "duplicate node " && matches == 2 {
+								break
+							}
 						}
 					}
 					if ix >= 0 {
+						if it.field == "" {
+							return fmt.Sprintf("$.nodes[%d]", ix)
+						}
 						return fmt.Sprintf("$.nodes[%d].%s", ix, it.field)
 					}
 				}
@@ -129,6 +139,11 @@ func path(raw []byte, msg string) string {
 	}
 	if strings.HasPrefix(msg, "unexpected schema ") {
 		return "$.schema"
+	}
+	if strings.HasPrefix(msg, "graph: undeclared or case-aliased JSON field ") {
+		if q := quote.FindStringSubmatch(msg); q != nil {
+			return "$." + q[1]
+		}
 	}
 	if strings.HasPrefix(msg, "nodes must be array") {
 		return "$.nodes"

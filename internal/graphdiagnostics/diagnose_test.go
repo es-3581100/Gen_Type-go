@@ -43,7 +43,8 @@ func TestInvalidDiagnostics(t *testing.T) {
 		code, path string
 	}{
 		{"duplicate key", bytes.Replace(b, []byte(`"schema":`), []byte(`"schema":"extra","schema":`), 1), "DUPLICATE_JSON_KEY", "$"},
-		{"alias", bytes.Replace(b, []byte(`"title":"Child"`), []byte(`"TITLE":"Child"`), 1), "UNKNOWN_FIELD", "$.nodes[1]"},
+		{"alias", bytes.Replace(b, []byte(`"title":"Child"`), []byte(`"TITLE":"Child"`), 1), "UNKNOWN_FIELD", "$.nodes[1].TITLE"},
+		{"unknown top", bytes.Replace(b, []byte(`"schema":`), []byte(`"bonus":true,"schema":`), 1), "UNKNOWN_FIELD", "$.bonus"},
 		{"missing", bytes.Replace(b, []byte(`"title":"Child",`), nil, 1), "MISSING_FIELD", "$.nodes[1].title"},
 		{"null", bytes.Replace(b, []byte(`"title":"Child"`), []byte(`"title":null`), 1), "NULL_FIELD", "$.nodes[1].title"},
 		{"schema", bytes.Replace(b, []byte(`"schema":"gen-type-go/phase-a-graph-v0"`), []byte(`"schema":"wrong"`), 1), "BAD_SCHEMA", "$.schema"},
