@@ -1,0 +1,32 @@
+{
+  "schema": "gen-type-go/phase-a-graph-v0",
+  "project_id": "demo-project",
+  "source_id": "unrelated-import",
+  "nodes": [
+    {
+      "id": "child",
+      "parent_id": "root",
+      "order": 0,
+      "title": "Child",
+      "content": "Unrelated replacement",
+      "source_ref": "fixture.md",
+      "source_digest_claim": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "id": "root",
+      "parent_id": "",
+      "order": 0,
+      "title": "Root",
+      "content": "Hello from the root",
+      "source_ref": "fixture.md",
+      "source_digest_claim": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "child",
+      "kind": "links_to"
+    }
+  ]
+}

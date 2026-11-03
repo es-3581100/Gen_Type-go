@@ -1,0 +1,33 @@
+{
+  "schema": "gen-type-go/proposed-negative-oracle-cases/v0",
+  "status": "SPECIFICATION_REVIEW_ONLY__UNRATIFIED",
+  "executed": false,
+  "authority": "none",
+  "invariants": [
+    "No scenario may produce ALLOW in the presence of an applicable denial, incoherent authority state, or unresolved lineage",
+    "No draft fixture label is an authenticated expected decision",
+    "A selected overlap precedence requires human ratification before any executable authority implementation"
+  ],
+  "candidate_single_fault_definitions": {
+    "DENY": "Valid current applicable denial in otherwise coherent trusted authority view",
+    "BLOCKED": "Protected authority state is incoherent or not safely evaluable",
+    "UNRESOLVED": "Applicable lineage or identity evidence is not independently verifiable"
+  },
+  "precedence_alternatives": [
+    {"id": "integrity_first", "ranking": ["BLOCKED", "UNRESOLVED", "DENY"], "selected": false},
+    {"id": "uncertainty_first", "ranking": ["UNRESOLVED", "BLOCKED", "DENY"], "selected": false},
+    {"id": "explicit_multi_fault", "ranking": [], "selected": false, "note": "Use a new combined-fault classification or fail without classification until view is coherent"}
+  ],
+  "cases": [
+    {"id": "NEG-001", "facts": ["coherent_view", "valid_inherited_deny"], "candidates": ["DENY"], "status": "PROPOSED_REFERENCE_NOT_RATIFIED"},
+    {"id": "NEG-002", "facts": ["incoherent_protected_view"], "candidates": ["BLOCKED"], "status": "PROPOSED_REFERENCE_NOT_RATIFIED"},
+    {"id": "NEG-003", "facts": ["unverifiable_grant_or_denial_lineage"], "candidates": ["UNRESOLVED"], "status": "PROPOSED_REFERENCE_NOT_RATIFIED"},
+    {"id": "NEG-004", "facts": ["valid_inherited_deny", "unverifiable_lineage"], "candidates": ["DENY", "UNRESOLVED", "BLOCKED"], "status": "OPEN_PRECEDENCE"},
+    {"id": "NEG-005", "facts": ["valid_inherited_deny", "stale_protected_revision"], "candidates": ["DENY", "BLOCKED"], "status": "OPEN_PRECEDENCE"},
+    {"id": "NEG-006", "facts": ["incoherent_protected_view", "applicable_inherited_deny"], "candidates": ["BLOCKED", "DENY"], "status": "OPEN_PRECEDENCE"},
+    {"id": "NEG-007", "facts": ["conflicting_lineage_records", "one_resolvable"], "candidates": ["UNRESOLVED", "BLOCKED"], "status": "OPEN_CLASSIFICATION"},
+    {"id": "NEG-008", "facts": ["source_revision_current", "policy_epoch_stale"], "candidates": ["BLOCKED", "UNRESOLVED"], "status": "OPEN_CLASSIFICATION"}
+  ],
+  "ratification_required": true,
+  "phase1_authorized": false
+}
