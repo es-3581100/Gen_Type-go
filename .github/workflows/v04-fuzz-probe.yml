@@ -1,0 +1,28 @@
+name: v0.4 bounded fuzz verification
+on:
+  push:
+    branches:
+      - feat/graph-inspection-v0.4
+permissions:
+  contents: read
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Run bounded read-only v0.4 fuzz campaigns
+        env:
+          GOPROXY: "off"
+          GOSUMDB: "off"
+          GOWORK: "off"
+          GOMAXPROCS: "2"
+        run: |
+          go test -run '^$' -fuzz '^FuzzInspectPermutation$' -fuzztime=5s -parallel=2 ./internal/graphinspect
+          go test -run '^$' -fuzz '^FuzzDiagnoseDeterminism$' -fuzztime=5s -parallel=2 ./internal/graphdiagnostics
