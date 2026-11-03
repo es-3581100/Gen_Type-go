@@ -1,12 +1,12 @@
 # Gen Type-Go v0.3 — development verification
 
-**Status:** local implementation and test matrix PASS; independent exact-byte review and publication remain pending.
+**Historical local execution checkpoint:** the local test matrix passed at development time. Subsequently, v0.3 was published, PR #2 was merged, and hosted pre-merge/post-merge CI passed. This document preserves original local evidence rather than presenting it as newly rerun. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for dated hosted results, review provenance limits, and governance follow-up.
 
 ## Source and baseline
 
 - Baseline: v0.2 merge commit `8bac78ffac56ac2f7aa831bab17996b8afb52a68`, tree `f8b9a2780a6bd671c72309491d45d9fa43bd0296`.
 - Source: exact v0.2 candidate ZIP `16411b69604848ed89aa87ab2e38b666e0e7d3413b97917669e27e9a83e30c92`; 53 entries, 52/52 verified source-member hashes.
-- Current output: isolated Go source tree; no v0.3 GitHub commit or pull request.
+- Original checkpoint output: isolated Go source tree before the v0.3 GitHub commit and PR. Later published as feature commit `df687011fc39ff8898babe6b7ae29c89971ba0a6` and merged as `0d00e00b65224253e8e733dce3c3ee9853cb5086`.
 - Target branch (created from baseline): `feat/graph-stats-v0.3`.
 
 ## Commands and evidence
@@ -56,7 +56,7 @@ The background quality script recorded exit code `0` after every Go check and fi
 
 ## Limitations and next steps
 
-- This is a local candidate; hosted CI for v0.3 and independent exact-byte review are not yet performed.
+- At the time of the original local checkpoint, hosted CI and independent re-audit had not yet been performed. The later PR reported bounded independent review, and exact pre-merge and post-merge hosted CI succeeded; formal GitHub review submissions remain absent. This record does not independently replay the external audit's archive, fuzz or Python-oracle claims.
 - No authenticated lineage, authorization, revision admission, trusted imported sources, or persistence.
 - Full correctness is not established by tests or fuzzing. Particularly stress deeply nested inputs, resource budgets, and graph connectivity under cross-root edges.
 

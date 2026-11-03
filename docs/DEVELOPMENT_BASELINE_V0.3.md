@@ -1,3 +1,7 @@
+# Historical baseline checkpoint (before v0.3 publication)
+
+> This document intentionally preserves the pre-publication starting state. It is not a claim about current GitHub state. See [v0.3 promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for PR #2, merge, CI, and open governance evidence.
+
 # Development baseline — v0.3 graph statistics
 
 - Target repository: `https://github.com/es-3581100/Gen_Type-go`
