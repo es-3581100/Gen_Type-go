@@ -6,6 +6,7 @@ bounded local JSON / standard input
     -> internal/phasea.Canonicalize (deterministic preorder and sorted edges)
     -> canonical JSON + LF / SHA-256 / strict roundtrip
     -> cmd/gen-type-go (read-only CLI)
+          -> internal/graphdiff (pure validated comparison; no trusted lineage)
           -> internal/inspection (bounded, XML-escaped static SVG/HTML)
 ```
 
@@ -14,3 +15,5 @@ bounded local JSON / standard input
 The graph v0 schema requires project/source identifiers, explicit node and edge arrays, unique node IDs in a snapshot, valid parent references, contiguous sibling order, supported link kinds, and finite size budgets. A forest is allowed; source-provided identifiers and digest claims **do not** establish identity across imports. Rendering uses escaped text and rejects graphs exceeding 256 nodes; it is not an authorization projection.
 
 Persistence, multi-user access, history, semantic search, discovery, HTML editing, agent JSON APIs, and revision admission remain planned only. An SVG/HTML *export* is not a live frontend/service. Do not interpret a static graphic, matching digest, or pure diagnostic as a trusted permission decision.
+
+Version 0.2 adds `diff`: two bounded and strictly validated inputs pass through the existing canonicalization contract, and a pure `internal/graphdiff` comparison emits sorted JSON differences. Source IDs and node IDs remain untrusted strings even when equal across inputs. `--summary` renders human-readable counts using the same Report. Nothing in this path calls the historical authorization proof.

@@ -27,7 +27,7 @@ func TestWorkingCommands(t *testing.T) {
 		cmd    string
 		marker string
 	}{
-		{"help", "Phase A graph workbench"}, {"version", "0.1.0-phase-a-preview"},
+		{"help", "Phase A graph workbench"}, {"version", "0.2.0-dev-graph-diff"},
 		{"validate", "VALID graph: 2 nodes, 1 edges"},
 		{"roundtrip", "ROUNDTRIP PASS"},
 		{"svg", "<svg"}, {"html", "<!doctype html>"},
@@ -141,5 +141,5 @@ func Example_run() {
 	var o, e bytes.Buffer
 	run([]string{"version"}, strings.NewReader(""), &o, &e)
 	fmt.Print(o.String())
-	// Output: gen-type-go 0.1.0-phase-a-preview
+	// Output: gen-type-go 0.2.0-dev-graph-diff
 }

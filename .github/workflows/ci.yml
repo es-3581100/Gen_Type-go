@@ -36,3 +36,13 @@ jobs:
           if go run ./cmd/gen-type-go validate testdata/invalid_cycle.json; then
             echo 'invalid cycle unexpectedly accepted' >&2; exit 1
           fi
+          # Deterministic read-only v0.2 graph diff smoke checks.
+          go run ./cmd/gen-type-go diff testdata/tiny_graph.json testdata/diff_after.json > "$RUNNER_TEMP/diff-one.json"
+          go run ./cmd/gen-type-go diff testdata/tiny_graph.json testdata/diff_after.json > "$RUNNER_TEMP/diff-two.json"
+          cmp "$RUNNER_TEMP/diff-one.json" "$RUNNER_TEMP/diff-two.json"
+          go run ./cmd/gen-type-go diff --summary testdata/tiny_graph.json testdata/diff_after.json > "$RUNNER_TEMP/diff-summary.txt"
+          grep -q 'Added nodes: 1' "$RUNNER_TEMP/diff-summary.txt"
+          if go run ./cmd/gen-type-go diff testdata/tiny_graph.json testdata/invalid_cycle.json > "$RUNNER_TEMP/diff-invalid.json"; then
+            echo 'invalid graph unexpectedly diffed' >&2; exit 1
+          fi
+          test ! -s "$RUNNER_TEMP/diff-invalid.json"

@@ -23,3 +23,7 @@ This is the *builder's local execution evidence*. It is not a signed external au
 The original Draft 004 validator source has SHA-256 `085f62feede5de67f04ebfda142f26f6a0c9802288eb0b58ccfdd28b9eaad922`. Python runtime is 3.13.5; optional JSON Schema validator is `jsonschema` 4.26.0. The exact replay command executed was `python3 verify_exact_artifacts.py gen-type-go-unified-authority-rfc-draft-004-2026-11-02.zip gen-type-go-draft004-targeted-lineage-evidence-2026-11-02.zip` using a temporary extraction and unchanged source. These evidence scripts and byte-level original source archives are external support assets, not present in the public source tree.
 
 **Full inherited race suite completed successfully in the MIT publication gate run** (exit 0, all four packages). Earlier timeout remains a separate historical result; neither outcome supplies an independent third-party audit. Reviewers should rerun the full test suite against the exact final source ZIP.
+
+## v0.2 diff development verification
+
+The original v0.1 proof remains unchanged. New tests under `internal/graphdiff` and `cmd/gen-type-go` cover deterministic diff JSON, metadata, children, edges, reparenting, cross-import ID collisions, large bounded graphs, input mutation, malformed inputs, CLI exit codes, stdin and output errors. CLI smoke and repeated JSON comparison are additionally included in `.github/workflows/ci.yml`. The full local verification record is `docs/DEVELOPMENT_VERIFICATION_V0.2.md`; the new development bytes have not yet received an independent audit or hosted CI result.
