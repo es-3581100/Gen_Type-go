@@ -11,11 +11,12 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/es-3581100/Gen_Type-go/internal/graphdiff"
 	"github.com/es-3581100/Gen_Type-go/internal/inspection"
 	"github.com/es-3581100/Gen_Type-go/internal/phasea"
 )
 
-const version = "0.1.0-phase-a-preview"
+const version = "0.2.0-dev-graph-diff"
 const usage = `Gen Type-Go — read-only Phase A graph workbench (no authority services)
 
 Usage:
@@ -28,8 +29,12 @@ Usage:
   gen-type-go roundtrip INPUT.json
   gen-type-go svg INPUT.json
   gen-type-go html INPUT.json
+  gen-type-go diff [--summary] BEFORE.json AFTER.json
 
-INPUT.json may be '-' for standard input. Input is limited to 2 MiB.
+INPUT.json may be '-' for standard input. Each input is limited to 2 MiB.
+The diff command may read one, but not both, inputs from standard input.
+Diff output is deterministic JSON (or text counts with --summary), never authority.
+Redirect stdout to write a file after successful validation.
 All SHA-256 values refer to canonical JSON bytes (including final LF),
 not to the original input file. No command mutates its input or grants authority.
 The svg/html commands emit inert static views; redirect stdout to save them.
@@ -52,7 +57,7 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	}
 	command := args[0]
 	switch command {
-	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html":
+	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html", "diff":
 	default:
 		fmt.Fprintln(errout, "unknown command:", command)
 		fmt.Fprint(errout, usage)
@@ -61,7 +66,23 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(errout)
 	expected := fs.String("sha256", "", "lowercase SHA-256 of canonical JSON")
+	summary := fs.Bool("summary", false, "text counts and canonical hashes (diff only)")
 	if err := fs.Parse(args[1:]); err != nil {
+		return 2
+	}
+	if command == "diff" {
+		if *expected != "" {
+			fmt.Fprintln(errout, "--sha256 is only valid for verify")
+			return 2
+		}
+		if fs.NArg() != 2 || fs.Arg(0) == "-" && fs.Arg(1) == "-" {
+			fmt.Fprintln(errout, "diff requires two input paths (at most one may be - for stdin)")
+			return 2
+		}
+		return runDiff(fs.Arg(0), fs.Arg(1), *summary, in, out, errout)
+	}
+	if *summary {
+		fmt.Fprintln(errout, "--summary is only valid for diff")
 		return 2
 	}
 	if fs.NArg() != 1 {
@@ -77,23 +98,7 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 		fmt.Fprintln(errout, "--sha256 is only valid for verify")
 		return 2
 	}
-	path := fs.Arg(0)
-	reader := in
-	if path != "-" {
-		f, err := os.Open(path)
-		if err != nil {
-			fmt.Fprintln(errout, "open:", err)
-			return 2
-		}
-		defer f.Close()
-		reader = f
-	}
-	raw, err := io.ReadAll(io.LimitReader(reader, phasea.MaxInputBytes+1))
-	if err != nil {
-		fmt.Fprintln(errout, "read:", err)
-		return 2
-	}
-	doc, err := phasea.DecodeStrict(raw)
+	doc, err := readGraph(fs.Arg(0), in)
 	if err != nil {
 		fmt.Fprintln(errout, "invalid graph:", err)
 		return 2
@@ -141,6 +146,65 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	}
 	if err != nil {
 		fmt.Fprintln(errout, "output:", err)
+		return 2
+	}
+	return 0
+}
+
+// readGraph enforces the same bounded strict input contract for all commands.
+func readGraph(path string, stdin io.Reader) (phasea.Document, error) {
+	reader := stdin
+	if path != "-" {
+		f, err := os.Open(path)
+		if err != nil {
+			return phasea.Document{}, fmt.Errorf("open %s: %w", path, err)
+		}
+		defer f.Close()
+		reader = f
+	}
+	raw, err := io.ReadAll(io.LimitReader(reader, phasea.MaxInputBytes+1))
+	if err != nil {
+		return phasea.Document{}, fmt.Errorf("read %s: %w", path, err)
+	}
+	return phasea.DecodeStrict(raw)
+}
+
+func runDiff(beforePath, afterPath string, summary bool, stdin io.Reader, out, errout io.Writer) int {
+	before, err := readGraph(beforePath, stdin)
+	if err != nil {
+		fmt.Fprintln(errout, "invalid before graph:", err)
+		return 2
+	}
+	after, err := readGraph(afterPath, stdin)
+	if err != nil {
+		fmt.Fprintln(errout, "invalid after graph:", err)
+		return 2
+	}
+	report, err := graphdiff.Compare(before, after)
+	if err != nil {
+		fmt.Fprintln(errout, "diff:", err)
+		return 2
+	}
+	var encoded []byte
+	if summary {
+		encoded = []byte(fmt.Sprintf("Graph diff (untrusted syntactic IDs only)\nBefore SHA-256: %s\nAfter SHA-256: %s\nIdentical: %t\nMetadata changes: %d\nAdded nodes: %d\nRemoved nodes: %d\nModified nodes: %d\nReparented nodes: %d\nChanged child lists: %d\nAdded edges: %d\nRemoved edges: %d\n",
+			report.BeforeSHA256, report.AfterSHA256, report.Identical, len(report.MetadataChanges),
+			len(report.AddedNodes), len(report.RemovedNodes), len(report.ModifiedNodes),
+			len(report.ReparentedNodes), len(report.ChildOrderChanges), len(report.AddedEdges), len(report.RemovedEdges)))
+	} else {
+		encoded, err = graphdiff.Encode(report)
+	}
+	if err != nil {
+		fmt.Fprintln(errout, "diff output:", err)
+		return 2
+	}
+	n, err := out.Write(encoded)
+	if err != nil {
+		fmt.Fprintln(errout, "output:", err)
+		return 2
+	}
+	if n != len(encoded) {
+		fmt.Fprintln(errout, "output:", io.ErrShortWrite)
 		return 2
 	}
 	return 0

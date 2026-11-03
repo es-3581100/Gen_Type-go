@@ -1,0 +1,46 @@
+{
+  "schema": "gen-type-go/phase-a-graph-v0",
+  "project_id": "demo-project",
+  "source_id": "unverified-fixture",
+  "nodes": [
+    {
+      "id": "child",
+      "parent_id": "root",
+      "order": 0,
+      "title": "Child revised",
+      "content": "Revised child text",
+      "source_ref": "fixture.md",
+      "source_digest_claim": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "root",
+      "parent_id": "",
+      "order": 0,
+      "title": "Root",
+      "content": "Hello from the root",
+      "source_ref": "fixture.md",
+      "source_digest_claim": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "note",
+      "parent_id": "root",
+      "order": 1,
+      "title": "New note",
+      "content": "Untrusted new content",
+      "source_ref": "fixture.md",
+      "source_digest_claim": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "note",
+      "kind": "depends_on"
+    },
+    {
+      "from": "child",
+      "to": "note",
+      "kind": "related_to"
+    }
+  ]
+}
