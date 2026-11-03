@@ -104,12 +104,16 @@ func FuzzDiagnoseDeterminism(f *testing.F) {
 }
 
 func TestMultipleIndependentErrorsAreDeterministic(t *testing.T) {
- raw:=bytes.Replace(valid(),[]byte(`"title":"Child"`),[]byte(`"TITLE":"Child","ZZZ":"other"`),1)
- first,_:=Encode(Diagnose(raw))
- for i:=0;i<250;i++ {
-  got,_:=Encode(Diagnose(raw))
-  if !bytes.Equal(first,got) {t.Fatalf("multiple malformed fields produced unstable diagnosis")}
- }
- var report Report
- if err:=json.Unmarshal(first,&report);err!=nil||report.Valid||len(report.Diagnostics)!=1||report.Diagnostics[0].Code!="UNKNOWN_FIELD" {t.Fatalf("unexpected rejection: %+v %v",report,err)}
+	raw := bytes.Replace(valid(), []byte(`"title":"Child"`), []byte(`"TITLE":"Child","ZZZ":"other"`), 1)
+	first, _ := Encode(Diagnose(raw))
+	for i := 0; i < 250; i++ {
+		got, _ := Encode(Diagnose(raw))
+		if !bytes.Equal(first, got) {
+			t.Fatalf("multiple malformed fields produced unstable diagnosis")
+		}
+	}
+	var report Report
+	if err := json.Unmarshal(first, &report); err != nil || report.Valid || len(report.Diagnostics) != 1 || report.Diagnostics[0].Code != "UNKNOWN_FIELD" {
+		t.Fatalf("unexpected rejection: %+v %v", report, err)
+	}
 }
