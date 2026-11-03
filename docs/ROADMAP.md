@@ -10,6 +10,11 @@
 - Deterministic, read-only statistics for **one** validated local graph: nodes and edges; forest roots/leaves, hierarchy depth and branching distributions; weak components considering hierarchy and typed edges; explicit edge kinds; exact average branching fraction. No inferred hidden edges or authority.
 - Verified via local reference-generated forests, CLI negatives, fuzz tests and deterministic packaging per PR #2's review report; hosted pre-merge and post-merge Go CI succeeded. This is not authority work. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for the evidence limits and outstanding governance follow-up.
 
+## v0.4 implementation candidate (not yet merged)
+
+- Read-only graph node lookup and navigation across supplied local hierarchy and explicit edges; stable strict-decoder diagnostics with actionable field hints.
+- Isolated feature branch, independent verification and owner merge approval pending. No ingestion, persistence, editor, UI or authority evaluator.
+
 ## Later independent development proposals
 
 1. More useful read-only graph inspection, focused error diagnostics, and source-local ingestion adapters with non-destructive source preservation. Each new untrusted-file boundary requires its own review.

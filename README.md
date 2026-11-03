@@ -46,6 +46,16 @@ go run ./cmd/gen-type-go stats --summary testdata/stats_forest.json
 
 The deterministic `stats` JSON reports node/edge/root/leaf counts, hierarchical depth and branching distributions, exact rational mean branching, explicit edge-kind counts, and weak component sizes. Weak connectivity treats the supplied parent-child and typed edges as undirected *for statistics only*. A root count is not necessarily a component count. The CLI does **not** infer hidden lineage, permissions, or trusted associations. See [graph statistics contract](docs/GRAPH_STATS_CONTRACT.md).
 
+## v0.4 development candidate — read-only graph inspection
+
+```sh
+go run ./cmd/gen-type-go inspect --id c testdata/stats_forest.json
+go run ./cmd/gen-type-go diagnose testdata/stats_forest.json
+go run ./cmd/gen-type-go diagnose testdata/invalid_cycle.json  # emits invalid JSON report, exits 2
+```
+
+`inspect` reports a node's source-provided fields, parent, ordered children, ancestors and descendants, roots and leaves, and explicit incoming/outgoing relationships. `diagnose` wraps the existing strict graph decoder in stable first-error diagnostics and actionable JSON-path hints. This v0.4 work is **not yet merged or released**. Neither command authenticates source claims, grants access, or evaluates protected authority. See [v0.4 inspection contract](docs/GRAPH_INSPECTION_CONTRACT_V0.4.md).
+
 ## Try verification and reconstruction
 
 ```sh
