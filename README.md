@@ -1,6 +1,6 @@
 # Gen Type-Go
 
-**Experimental v0.3.0 development candidate — read-only local-first graph workbench.**
+**Experimental v0.3.0 development preview — merged to `main` on 2026-11-03; read-only local-first graph workbench, not a tagged release or production authority service.**
 
 Gen Type-Go currently runs as a **Go command-line tool** for validating bounded hierarchical JSON, producing deterministic canonical representations and SHA-256 digests, checking round trips, exporting inert SVG/HTML graph outlines, **deterministically diffing two local graphs**, and **computing deterministic statistics for one local graph**. The included graph input and source digests are *untrusted data*, not identity or provenance attestations. No server, account, permission issuer, persistence layer, or automatic importer is active.
 
@@ -37,7 +37,7 @@ go run ./cmd/gen-type-go diff --summary testdata/tiny_graph.json testdata/diff_a
 
 Diff JSON is deterministic and reports node changes, ordered child lists, edge differences, metadata and canonical hashes; it is **not an authorization or trusted lineage proof**. Matching node IDs across sources remain only syntactic matches. See the [graph diff contract](docs/GRAPH_DIFF_CONTRACT.md) and [changelog](CHANGELOG.md).
 
-## Measure one local graph (v0.3 development)
+## Measure one local graph (v0.3 merged preview)
 
 ```sh
 go run ./cmd/gen-type-go stats testdata/tiny_graph.json
@@ -63,8 +63,8 @@ The original legacy `cmd/phasea-proof` CLI remains as a clearly labeled *histori
 
 ## Contributing and project status
 
-The original v0.1 baseline was published with independent bounded verification. v0.2 was merged to `main` after independent review. This v0.3 increment is **not released** and requires its own exact-byte independent review. See [v0.3 development verification](docs/DEVELOPMENT_VERIFICATION_V0.3.md) for executed local checks, and [v0.2 verification](docs/DEVELOPMENT_VERIFICATION_V0.2.md) for the previous milestone. Go source has no third-party dependencies. Source-archive creation additionally uses standard-library Python 3; see [reproducibility](docs/REPRODUCIBILITY.md).
+The original v0.1 baseline was published with independent bounded verification. v0.2 was merged to `main` after independent review. v0.3 was merged to `main` on 2026-11-03 after passing feature-branch, PR, and post-merge GitHub Actions checks; this is a merged development preview, not evidence of a tagged release or formal GitHub review. PR #2 reports a bounded independent audit; owner approval provenance is not documented in the PR. See the [v0.3 promotion and governance record](docs/V0.3_PROMOTION_RECONCILIATION.md). See [v0.3 development verification](docs/DEVELOPMENT_VERIFICATION_V0.3.md) for executed local checks, and [v0.2 verification](docs/DEVELOPMENT_VERIFICATION_V0.2.md) for the previous milestone. Go source has no third-party dependencies. Source-archive creation additionally uses standard-library Python 3; see [reproducibility](docs/REPRODUCIBILITY.md).
 
 Read [architecture](docs/ARCHITECTURE.md), [build status](docs/BUILD_STATUS.md), [authority contract status](docs/AUTHORITY_CONTRACT_STATUS.md), [roadmap](docs/ROADMAP.md), [security](SECURITY.md), and [independent audit handoff](docs/INDEPENDENT_AUDIT_HANDOFF.md).
 
-The verified v0.3 starting baseline is the v0.2 merge commit `8bac78ffac56ac2f7aa831bab17996b8afb52a68` on [es-3581100/Gen_Type-go](https://github.com/es-3581100/Gen_Type-go). The new branch `feat/graph-stats-v0.3` initially points to that commit; **v0.3 source changes are not pushed or merged**. Public development changes and protected authority decisions remain under owner control.
+v0.3 began at v0.2 merge `8bac78ffac56ac2f7aa831bab17996b8afb52a68`, was published as feature commit `df687011fc39ff8898babe6b7ae29c89971ba0a6` in [PR #2](https://github.com/es-3581100/Gen_Type-go/pull/2), and merged to `main` as `0d00e00b65224253e8e733dce3c3ee9853cb5086`. This promotion does not grant authority permissions; the separate Phase 1 ratification gate is still blocked.

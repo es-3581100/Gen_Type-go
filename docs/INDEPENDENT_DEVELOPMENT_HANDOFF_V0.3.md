@@ -1,3 +1,7 @@
+# Historical independent-review handoff (before PR #2 merge)
+
+> The instructions below capture the pre-publication review request and original no-merge boundary. They are not a description of current GitHub state and do not establish whether the later owner merge was authorized. See [v0.3 promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md).
+
 # Gen Type-Go v0.3 — independent development review handoff
 
 **Candidate status:** local graph-statistics increment, independent audit pending. **Not** a security/authority review or Phase 1 authorization.

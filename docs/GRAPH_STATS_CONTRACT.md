@@ -1,6 +1,6 @@
 # Graph statistics contract — v0.3 development
 
-**Status:** locally implemented, not independently reviewed, not a published/ratified authority feature.
+**Status:** read-only stats implementation merged to `main` as a v0.3 development preview. PR #2 reports bounded independent review and hosted CI passed before and after merge; no formal GitHub review submission was recorded. **Not** a ratified authority feature or tagged release. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md).
 
 The `gen-type-go stats [--summary] INPUT.json` command produces deterministic, read-only measurements of **one explicitly supplied, fully validated Phase A graph**. It reuses `phasea.EncodeCanonical`; it does not reimplement a parser, accept partial graphs, infer hidden edges, or assign identity continuity across imports. The schema is `gen-type-go/graph-stats-v0`.
 

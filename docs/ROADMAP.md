@@ -5,10 +5,10 @@
 - **v0.1 Phase A preview:** bounded strict local graph validation, canonical JSON/SHA-256, reconstruction, inert SVG/HTML export.
 - **v0.2 merged on main:** deterministic, read-only comparison of two strictly validated local graphs; syntactic node-ID equality only.
 
-## Current bounded increment: v0.3 (development candidate, not published)
+## Bounded increment implemented: v0.3 (development preview, merged to `main`)
 
 - Deterministic, read-only statistics for **one** validated local graph: nodes and edges; forest roots/leaves, hierarchy depth and branching distributions; weak components considering hierarchy and typed edges; explicit edge kinds; exact average branching fraction. No inferred hidden edges or authority.
-- Verify with independent-reference generated forests, CLI negatives, fuzz tests and deterministic packaging. Keep this distinct from any future authority work.
+- Verified via local reference-generated forests, CLI negatives, fuzz tests and deterministic packaging per PR #2's review report; hosted pre-merge and post-merge Go CI succeeded. This is not authority work. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for the evidence limits and outstanding governance follow-up.
 
 ## Later independent development proposals
 
