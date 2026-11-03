@@ -1,15 +1,24 @@
-# Build status — initial public Phase A preview
+# Gen Type-Go — build status
 
-Implemented and tested: a real standard-library Go module, bounded exact-case JSON decoder, graph validation, deterministic canonical encoding and SHA-256, strict reconstruct/canonical roundtrip, safe read-only CLI commands, and bounded static SVG/HTML exports. Existing Phase A proof tests were carried forward from independently reviewed Repair 004; new CLI and inspection tests were added.
+**v0.3 development candidate** — bounded local statistics implementation, not pushed, merged, or independently reviewed.
 
-Historical experimental only: in-memory pure `Authorize` and sampled visibility diagnostics. They retain their source and test coverage but have **no live issuer, service, publisher, or admission consumer**.
+## Published baseline
 
-Deferred: robust wiki importers, trusted cross-import lineage, graph editing, persistence/recovery, authenticated user/agent APIs, policy activation, root recovery, search/memory, web discovery, multi-project isolation, and deployable UI.
+- `v0.1`: experimental public Phase A preview of a standard-library Go module, bounded strict JSON parsing, canonical graph validation and hashing, round-trip reconstruction, inert SVG/HTML export.
+- `v0.2`: deterministic, non-authoritative graph diff; independently reviewed and merged to `main` in merge commit `8bac78ffac56ac2f7aa831bab17996b8afb52a68`, Git tree `f8b9a2780a6bd671c72309491d45d9fa43bd0296`, hosted CI passed.
 
-Quality update: full inherited `go test -race -count=1 ./...` PASS (four packages) for the MIT candidate; the earlier timed-out run remains separately recorded.
+## v0.3 local implementation
 
-Known gates: MIT license selected and included; exact MIT publication candidate independent re-audit pending; RFC Draft 004 unratified; negative-disposition oracle absent; protected Phase 1 authorization withheld. This repository is a *new proposed source tree*, not an existing local checkout or GitHub commit.
+`stats [--summary] INPUT.json` reuses the same strict graph parser and canonical encoding and provides structural counts, histograms, exact branching ratios, and weak connected-component sizes. See `GRAPH_STATS_CONTRACT.md` for exact semantics. New tests exercise valid and invalid graphs, reference forest statistics, fuzzing, deterministic output and writer errors. An isolated source candidate and verification artifacts are available for independent review.
 
-## v0.2 development candidate (not merged)
+A remote branch `feat/graph-stats-v0.3` was created from the v0.2 merge commit, with **no v0.3 code pushed**. Owner authorization is required before pushing or opening a pull request.
 
-Implemented `diff` with deterministic JSON comparison and `--summary` text counts; input validation reuses the existing Go phasea parser. Target scope: local read-only data, no credentials, policies, admission, web server, or trusted cross-import identity. Starting public branch HEAD: `dcdd9cbd4f73bcb087d72fe270a7374588627faa`. Local archive baseline Git tree: `a990afc88516d7dfd0f914fb3c4cac8706947b3d`. New working code is isolated from GitHub and needs independent review. See `DEVELOPMENT_VERIFICATION_V0.2.md` for commands, initial timeout and successful complete race rerun; nothing about this feature changes `NEGATIVE_DISPOSITION_ORACLE_OPEN__RATIFICATION_PENDING__PHASE1_BLOCKED`.
+## Historical experimental code
+
+`internal/phasea/authz.go` remains historical in-memory proof code; the public CLI does not call it. There is no authenticated issuer, trusted cross-import lineage, production authorization service, approval of structural revisions, policy publisher, or privileged agent API.
+
+## Not implemented
+
+Live wiki/project ingestion adapters, verified cross-import identities, editors, persistent project isolation/history, authenticated APIs, trusted policy activation, root recovery, semantic search, web discovery, and production UI.
+
+**Protected authority gate (unchanged):** `NEGATIVE_DISPOSITION_ORACLE_OPEN__RATIFICATION_PENDING__PHASE1_BLOCKED`. Published or tested source is not an authorization grant.

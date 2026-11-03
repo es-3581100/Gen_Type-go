@@ -46,3 +46,15 @@ jobs:
             echo 'invalid graph unexpectedly diffed' >&2; exit 1
           fi
           test ! -s "$RUNNER_TEMP/diff-invalid.json"
+          # Deterministic, non-authoritative v0.3 graph stats smoke checks.
+          go run ./cmd/gen-type-go stats testdata/stats_forest.json > "$RUNNER_TEMP/stats-one.json"
+          go run ./cmd/gen-type-go stats testdata/stats_forest.json > "$RUNNER_TEMP/stats-two.json"
+          cmp "$RUNNER_TEMP/stats-one.json" "$RUNNER_TEMP/stats-two.json"
+          grep -q '"node_count":7' "$RUNNER_TEMP/stats-one.json"
+          grep -q '"weak_component_sizes":\[6,1\]' "$RUNNER_TEMP/stats-one.json"
+          go run ./cmd/gen-type-go stats --summary testdata/stats_forest.json > "$RUNNER_TEMP/stats-summary.txt"
+          grep -q 'Roots: 3' "$RUNNER_TEMP/stats-summary.txt"
+          if go run ./cmd/gen-type-go stats testdata/invalid_cycle.json > "$RUNNER_TEMP/stats-invalid.json"; then
+            echo 'invalid graph unexpectedly measured' >&2; exit 1
+          fi
+          test ! -s "$RUNNER_TEMP/stats-invalid.json"

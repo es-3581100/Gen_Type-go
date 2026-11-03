@@ -12,11 +12,12 @@ import (
 	"regexp"
 
 	"github.com/es-3581100/Gen_Type-go/internal/graphdiff"
+	"github.com/es-3581100/Gen_Type-go/internal/graphstats"
 	"github.com/es-3581100/Gen_Type-go/internal/inspection"
 	"github.com/es-3581100/Gen_Type-go/internal/phasea"
 )
 
-const version = "0.2.0-dev-graph-diff"
+const version = "0.3.0-dev-graph-stats"
 const usage = `Gen Type-Go — read-only Phase A graph workbench (no authority services)
 
 Usage:
@@ -30,9 +31,11 @@ Usage:
   gen-type-go svg INPUT.json
   gen-type-go html INPUT.json
   gen-type-go diff [--summary] BEFORE.json AFTER.json
+  gen-type-go stats [--summary] INPUT.json
 
 INPUT.json may be '-' for standard input. Each input is limited to 2 MiB.
 The diff command may read one, but not both, inputs from standard input.
+Stats reports only the supplied local structure; no identity or authority proof.
 Diff output is deterministic JSON (or text counts with --summary), never authority.
 Redirect stdout to write a file after successful validation.
 All SHA-256 values refer to canonical JSON bytes (including final LF),
@@ -57,7 +60,7 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	}
 	command := args[0]
 	switch command {
-	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html", "diff":
+	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html", "diff", "stats":
 	default:
 		fmt.Fprintln(errout, "unknown command:", command)
 		fmt.Fprint(errout, usage)
@@ -66,7 +69,7 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(errout)
 	expected := fs.String("sha256", "", "lowercase SHA-256 of canonical JSON")
-	summary := fs.Bool("summary", false, "text counts and canonical hashes (diff only)")
+	summary := fs.Bool("summary", false, "text summary (diff or stats)")
 	if err := fs.Parse(args[1:]); err != nil {
 		return 2
 	}
@@ -81,8 +84,8 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 		}
 		return runDiff(fs.Arg(0), fs.Arg(1), *summary, in, out, errout)
 	}
-	if *summary {
-		fmt.Fprintln(errout, "--summary is only valid for diff")
+	if *summary && command != "stats" {
+		fmt.Fprintln(errout, "--summary is only valid for diff or stats")
 		return 2
 	}
 	if fs.NArg() != 1 {
@@ -102,6 +105,9 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	if err != nil {
 		fmt.Fprintln(errout, "invalid graph:", err)
 		return 2
+	}
+	if command == "stats" {
+		return runStats(doc, *summary, out, errout)
 	}
 	canonical, digest, err := phasea.EncodeCanonical(doc)
 	if err != nil {
@@ -197,6 +203,38 @@ func runDiff(beforePath, afterPath string, summary bool, stdin io.Reader, out, e
 	if err != nil {
 		fmt.Fprintln(errout, "diff output:", err)
 		return 2
+	}
+	n, err := out.Write(encoded)
+	if err != nil {
+		fmt.Fprintln(errout, "output:", err)
+		return 2
+	}
+	if n != len(encoded) {
+		fmt.Fprintln(errout, "output:", io.ErrShortWrite)
+		return 2
+	}
+	return 0
+}
+
+func runStats(doc phasea.Document, summary bool, out, errout io.Writer) int {
+	report, err := graphstats.Analyze(doc)
+	if err != nil {
+		fmt.Fprintln(errout, "stats:", err)
+		return 2
+	}
+	var encoded []byte
+	if summary {
+		encoded = []byte(fmt.Sprintf("Graph statistics (local data; untrusted IDs and provenance)\nCanonical SHA-256: %s\nNodes: %d\nExplicit edges: %d\nHierarchy edges: %d\nRoots: %d\nLeaves: %d\nMaximum depth: %d\nMaximum branching factor: %d\nWeak components: %d\nIsolated nodes: %d\n",
+			report.CanonicalSHA256, report.NodeCount, report.ExplicitEdgeCount,
+			report.HierarchyEdgeCount, report.RootCount, report.LeafCount,
+			report.MaxDepth, report.MaxBranchingFactor, report.WeakComponentCount,
+			report.IsolatedNodeCount))
+	} else {
+		encoded, err = graphstats.Encode(report)
+		if err != nil {
+			fmt.Fprintln(errout, "stats output:", err)
+			return 2
+		}
 	}
 	n, err := out.Write(encoded)
 	if err != nil {
