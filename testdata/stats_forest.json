@@ -1,0 +1,18 @@
+{
+  "schema": "gen-type-go/phase-a-graph-v0",
+  "project_id": "synthetic-stats-project",
+  "source_id": "unverified-stats-fixture",
+  "nodes": [
+    {"id":"d","parent_id":"r2","order":0,"title":"D","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"c","parent_id":"a","order":0,"title":"C","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"r3","parent_id":"","order":2,"title":"Root 3","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"a","parent_id":"r1","order":0,"title":"A","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"r2","parent_id":"","order":1,"title":"Root 2","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"b","parent_id":"r1","order":1,"title":"B","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id":"r1","parent_id":"","order":0,"title":"Root 1","content":"","source_ref":"synthetic.md","source_digest_claim":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+  ],
+  "edges": [
+    {"from":"c","to":"c","kind":"related_to"},
+    {"from":"r1","to":"r2","kind":"depends_on"}
+  ]
+}

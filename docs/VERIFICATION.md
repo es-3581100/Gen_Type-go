@@ -27,3 +27,7 @@ The original Draft 004 validator source has SHA-256 `085f62feede5de67f04ebfda142
 ## v0.2 diff development verification
 
 The original v0.1 proof remains unchanged. New tests under `internal/graphdiff` and `cmd/gen-type-go` cover deterministic diff JSON, metadata, children, edges, reparenting, cross-import ID collisions, large bounded graphs, input mutation, malformed inputs, CLI exit codes, stdin and output errors. CLI smoke and repeated JSON comparison are additionally included in `.github/workflows/ci.yml`. The full local verification record is `docs/DEVELOPMENT_VERIFICATION_V0.2.md`; the new development bytes have not yet received an independent audit or hosted CI result.
+
+## v0.3 development statistics
+
+The newly added `internal/graphstats` analyzer has direct multi-root and cross-root-link reference fixtures, independently computed DFS/BFS comparisons for randomly generated valid forests, shuffle-invariance checks, malicious title non-disclosure tests, input immutability tests, over-budget errors, and an opt-in valid-forest fuzz target. `cmd/gen-type-go/stats_test.go` covers CLI file/stdin, text summary, repeated bytes, malformed input, and short-write/output failures. Execute `go test -count=1 ./...`, `go test -race -count=1 ./...`, `go vet ./...`, `go build ./...`, and a bounded fuzz run. Consult `DEVELOPMENT_VERIFICATION_V0.3.md` for actual execution status; a past version's green CI is not evidence of this candidate.
