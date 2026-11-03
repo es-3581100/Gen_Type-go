@@ -7,7 +7,7 @@
 - Defines weak connectivity precisely as ignoring direction across **both** hierarchical parent-child relationships and explicit typed edges, without treating this as source or identity continuity.
 - Added independent-reference randomized valid-forest tests, full CLI error-path tests, a bounded valid-forest fuzz target, and a multi-root synthetic example.
 - Keeps the historical authority proof inert. No network, persistence, policy publication, or privileged action is added.
-- PR #2 at feature commit `df687011fc39` passed hosted pre-merge CI; merge commit `0d00e00b6522` passed post-merge CI. No formal GitHub review was recorded; owner authorization provenance remains open. See [promotion reconciliation](docs/V0.3_PROMOTION_RECONCILIATION.md).
+- PR #2 at feature commit `df687011fc39` passed hosted pre-merge CI; merge commit `0d00e00b6522` passed post-merge CI. No formal GitHub review was recorded. An explicit out-of-band owner authorization at 2026-11-03T20:11:07Z was later located and recorded in the [PR #2 authorization addendum](https://github.com/es-3581100/Gen_Type-go/pull/2#issuecomment-6615318149); the branch-protection configuration is separately open in [branch-protection issue #4](https://github.com/es-3581100/Gen_Type-go/issues/4). See [promotion reconciliation](docs/V0.3_PROMOTION_RECONCILIATION.md).
 
 ## 0.2.0 — merged to `main`, independently reviewed
 
