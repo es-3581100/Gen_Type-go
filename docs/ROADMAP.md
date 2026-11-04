@@ -8,7 +8,7 @@
 ## Bounded increment implemented: v0.3 (development preview, merged to `main`)
 
 - Deterministic, read-only statistics for **one** validated local graph: nodes and edges; forest roots/leaves, hierarchy depth and branching distributions; weak components considering hierarchy and typed edges; explicit edge kinds; exact average branching fraction. No inferred hidden edges or authority.
-- Verified via local reference-generated forests, CLI negatives, fuzz tests and deterministic packaging per PR #2's review report; hosted pre-merge and post-merge Go CI succeeded. This is not authority work. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for the evidence limits and outstanding governance follow-up.
+- Verified via local reference-generated forests, CLI negatives, fuzz tests and deterministic packaging per PR #2's review report; hosted pre-merge and post-merge Go CI succeeded. This is not authority work. See [promotion reconciliation](V0.3_PROMOTION_RECONCILIATION.md) for the evidence limits and subsequently completed `main` branch-protection follow-up (Issue #4).
 
 ## v0.4 implementation candidate (not yet merged)
 

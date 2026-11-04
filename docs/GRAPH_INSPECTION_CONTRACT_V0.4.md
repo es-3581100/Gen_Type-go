@@ -1,6 +1,6 @@
 # Gen Type-Go v0.4 — read-only inspection and diagnostics
 
-**Development candidate only:** `feat/graph-inspection-v0.4`, based on v0.3 `main` commit `da9df31ca00fc9c9eb7c16838ce7f5cdf3d6872b`. No merge/release/authority promotion.
+**Development candidate only:** `feat/graph-inspection-v0.4`, originally based on v0.3 `main` commit `da9df31ca00fc9c9eb7c16838ce7f5cdf3d6872b` and subsequently reconciled against `main` merge commit `7b071c7c0ed5037b107f4ae9a263f3c06853c46f`. No PR #6 merge/release/authority promotion.
 
 ## Commands
 
