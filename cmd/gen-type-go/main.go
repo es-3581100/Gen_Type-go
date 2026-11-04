@@ -17,7 +17,7 @@ import (
 	"github.com/es-3581100/Gen_Type-go/internal/phasea"
 )
 
-const version = "0.3.0-dev-graph-stats"
+const version = "0.4.0-dev-graph-inspection"
 const usage = `Gen Type-Go — read-only Phase A graph workbench (no authority services)
 
 Usage:
@@ -32,6 +32,8 @@ Usage:
   gen-type-go html INPUT.json
   gen-type-go diff [--summary] BEFORE.json AFTER.json
   gen-type-go stats [--summary] INPUT.json
+  gen-type-go inspect --id NODE_ID INPUT.json
+  gen-type-go diagnose INPUT.json
 
 INPUT.json may be '-' for standard input. Each input is limited to 2 MiB.
 The diff command may read one, but not both, inputs from standard input.
@@ -60,11 +62,17 @@ func run(args []string, in io.Reader, out, errout io.Writer) int {
 	}
 	command := args[0]
 	switch command {
-	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html", "diff", "stats":
+	case "validate", "canonical", "sha256", "verify", "roundtrip", "svg", "html", "diff", "stats", "inspect", "diagnose":
 	default:
 		fmt.Fprintln(errout, "unknown command:", command)
 		fmt.Fprint(errout, usage)
 		return 2
+	}
+	if command == "inspect" {
+		return runInspectCLI(args[1:], in, out, errout)
+	}
+	if command == "diagnose" {
+		return runDiagnoseCLI(args[1:], in, out, errout)
 	}
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(errout)
