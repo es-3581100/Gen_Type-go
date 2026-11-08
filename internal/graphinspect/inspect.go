@@ -11,7 +11,13 @@ import (
 
 const Schema = "gen-type-go/graph-inspection-v0"
 const IdentityBoundary = "local_graph_structure_only;source_claims_unverified;no_lineage_or_permission_inference"
-const MaxOutputBytes = 4 << 20
+
+// MaxOutputBytes is sized for the worst *valid* input, not a typical one. A
+// 2 MiB graph whose node and parent each carry 256 KiB of '<' (one input byte,
+// six after JSON escaping) plus ~5,300 leaf children (each ID is listed as a
+// child, a descendant and a leaf) encodes to ~5.2 MB, so the former 4 MiB cap
+// rejected graphs that validate. TestInspectWorstCaseValidInputFitsBudget pins it.
+const MaxOutputBytes = 8 << 20
 
 var ErrNodeNotFound = errors.New("node not found")
 

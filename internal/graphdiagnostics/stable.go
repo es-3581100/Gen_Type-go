@@ -7,6 +7,7 @@ import (
 	"github.com/es-3581100/Gen_Type-go/internal/phasea"
 	"regexp"
 	"sort"
+	"strconv"
 	"unicode/utf8"
 )
 
@@ -30,8 +31,16 @@ func stableDiagnostic(raw []byte) Diagnostic {
 	if !json.Valid(raw) {
 		return problem("MALFORMED_JSON", "$", "input is not one valid JSON value", "provide one complete JSON graph object")
 	}
-	if firstDuplicateJSONKey(raw) {
+	// DecodeStrict checks escaped surrogates before its depth and duplicate-key
+	// pass, so the advisory classifier keeps that precedence.
+	if hasUnpairedSurrogateEscape(raw) {
+		return problem("INVALID_ESCAPE", "$", "string contains an unpaired UTF-16 surrogate escape", "use a complete surrogate pair or the literal character")
+	}
+	switch duplicate, tooDeep := scanJSONKeys(raw); {
+	case duplicate:
 		return problem("DUPLICATE_JSON_KEY", "$", "JSON object has a duplicate decoded key", "remove duplicated object keys")
+	case tooDeep:
+		return problem("NESTING_TOO_DEEP", "$", "JSON nesting exceeds the depth budget", "reduce JSON nesting to 96 levels or fewer")
 	}
 	var top map[string]json.RawMessage
 	if err := json.Unmarshal(raw, &top); err != nil || top == nil {
@@ -135,10 +144,8 @@ func stableDiagnostic(raw []byte) Diagnostic {
 		}
 		orders[n.ParentID][n.Order] = true
 	}
-	roots := kids[""]
-	if len(roots) == 0 {
-		return problem("INVALID_HIERARCHY", "$.nodes", "graph has no root", "supply a rooted hierarchy")
-	}
+	// Specific parent faults come before the aggregate no-root fault, as in
+	// phasea.Validate; otherwise a lone dangling parent reads as "no root".
 	for i, n := range doc.Nodes {
 		if n.ParentID == n.ID {
 			return problem("INVALID_PARENT", fmt.Sprintf("$.nodes[%d].parent_id", i), "node cannot parent itself", "use a different existing parent or empty root parent")
@@ -148,6 +155,10 @@ func stableDiagnostic(raw []byte) Diagnostic {
 				return problem("INVALID_PARENT", fmt.Sprintf("$.nodes[%d].parent_id", i), "parent node ID is missing", "reference an existing node ID")
 			}
 		}
+	}
+	roots := kids[""]
+	if len(roots) == 0 {
+		return problem("INVALID_HIERARCHY", "$.nodes", "graph has no root", "supply a rooted hierarchy")
 	}
 	parentNames := make([]string, 0, len(orders))
 	for name := range orders {
@@ -215,7 +226,7 @@ func checkObject(obj map[string]json.RawMessage, base string, required []string)
 	sort.Strings(keys)
 	for _, k := range keys {
 		if !allowed[k] {
-			return problem("UNKNOWN_FIELD", base+"."+k, "undeclared or case-aliased JSON field", "use only exact schema field names"), true
+			return problem("UNKNOWN_FIELD", base+pathKey(k), "undeclared or case-aliased JSON field", "use only exact schema field names"), true
 		}
 	}
 	for _, k := range required {
@@ -230,18 +241,27 @@ func checkObject(obj map[string]json.RawMessage, base string, required []string)
 	return Diagnostic{}, false
 }
 
-// firstDuplicateJSONKey scans decoded keys in wire order; it does not accept
-// JSON or override the strict parser's independent rejection.
-func firstDuplicateJSONKey(raw []byte) bool {
+// maxJSONDepth mirrors the strict decoder's nesting budget (phasea.scanJSONValue).
+const maxJSONDepth = 96
+
+// scanJSONKeys scans decoded keys in wire order and reports the first duplicate
+// key, or that nesting passes maxJSONDepth, whichever the wire reaches first. It
+// never accepts JSON or overrides the strict parser's independent rejection.
+//
+// Every finding or decode error stops the whole scan. Returning "no finding"
+// from a nested call without consuming its token would leave the enclosing loop
+// looking at the same token forever, so a 98-level array used to hang diagnose.
+func scanJSONKeys(raw []byte) (duplicate, tooDeep bool) {
 	dec := json.NewDecoder(bytes.NewReader(raw))
-	var walk func(int) bool
+	var walk func(int) (stop bool)
 	walk = func(depth int) bool {
-		if depth > 96 {
-			return false
+		if depth > maxJSONDepth {
+			tooDeep = true
+			return true
 		}
 		tok, err := dec.Token()
 		if err != nil {
-			return false
+			return true
 		}
 		delim, ok := tok.(json.Delim)
 		if !ok {
@@ -252,14 +272,12 @@ func firstDuplicateJSONKey(raw []byte) bool {
 			seen := make(map[string]bool)
 			for dec.More() {
 				key, err := dec.Token()
-				if err != nil {
-					return false
-				}
-				name, ok := key.(string)
-				if !ok {
-					return false
+				name, isString := key.(string)
+				if err != nil || !isString {
+					return true
 				}
 				if seen[name] {
+					duplicate = true
 					return true
 				}
 				seen[name] = true
@@ -278,5 +296,84 @@ func firstDuplicateJSONKey(raw []byte) bool {
 		}
 		return false
 	}
-	return walk(0)
+	walk(0)
+	return duplicate, tooDeep
+}
+
+// hasUnpairedSurrogateEscape mirrors the strict decoder's rejection of \uD800-\uDFFF
+// escapes that are not a high/low pair. It runs only after json.Valid, so every
+// escape is well formed and every string is terminated.
+func hasUnpairedSurrogateEscape(raw []byte) bool {
+	inString := false
+	for i := 0; i < len(raw); i++ {
+		c := raw[i]
+		if !inString {
+			inString = c == '"'
+			continue
+		}
+		switch c {
+		case '"':
+			inString = false
+		case '\\':
+			i++
+			if i >= len(raw) || raw[i] != 'u' {
+				continue
+			}
+			unit, ok := hex4(raw, i+1)
+			if !ok {
+				return false
+			}
+			i += 4
+			switch {
+			case unit >= 0xDC00 && unit <= 0xDFFF:
+				return true
+			case unit >= 0xD800 && unit <= 0xDBFF:
+				if i+6 >= len(raw) || raw[i+1] != '\\' || raw[i+2] != 'u' {
+					return true
+				}
+				low, ok := hex4(raw, i+3)
+				if !ok || low < 0xDC00 || low > 0xDFFF {
+					return true
+				}
+				i += 6
+			}
+		}
+	}
+	return false
+}
+
+func hex4(raw []byte, at int) (rune, bool) {
+	if at+4 > len(raw) {
+		return 0, false
+	}
+	v, err := strconv.ParseUint(string(raw[at:at+4]), 16, 16)
+	return rune(v), err == nil
+}
+
+// maxPathKeyBytes bounds how much attacker-controlled key text a path echoes.
+const maxPathKeyBytes = 64
+
+var simpleKey = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]{0,63}$`)
+
+// pathKey renders an object key as a path segment. Plain identifiers use dot
+// notation; anything else is bracket-quoted, ASCII-escaped and truncated, so a
+// hostile key cannot forge extra path segments, carry terminal control bytes,
+// or inflate the report past its output budget.
+func pathKey(key string) string {
+	if simpleKey.MatchString(key) {
+		return "." + key
+	}
+	truncated := false
+	if len(key) > maxPathKeyBytes {
+		cut := maxPathKeyBytes
+		for cut > 0 && !utf8.RuneStart(key[cut]) {
+			cut--
+		}
+		key, truncated = key[:cut], true
+	}
+	quoted := strconv.QuoteToASCII(key)
+	if truncated {
+		quoted = quoted[:len(quoted)-1] + `...(truncated)"`
+	}
+	return "[" + quoted + "]"
 }

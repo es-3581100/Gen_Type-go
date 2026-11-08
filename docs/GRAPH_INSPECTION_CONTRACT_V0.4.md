@@ -14,7 +14,8 @@
 - **Diagnose:** uses `phasea.DecodeStrict` as its **only** acceptance oracle. Valid input returns `valid:true`, a canonical digest, an empty `diagnostics` array and exit 0. Rejected input returns `valid:false`, a **single** stable diagnostic with `code`, best-effort JSON-style `path`, `message`, `action`, and exit 2. No canonical digest is emitted on failure.
 - Paths are hints, e.g. `$.nodes[1].parent_id`. When no exact location is justified, the path is `$`. No line-number or byte-offset claim is made; no partial graph is accepted.
 - File I/O failure, malformed flags, unknown inspected IDs and output failures report to stderr, return exit 2, and do not produce success JSON. Malformed **readable** input with `diagnose` produces a deterministic rejection JSON even while returning exit 2.
-- Both reports are capped at 4 MiB before any stdout write. Successful stdout ends with LF. Output write errors and short writes return exit 2.
+- `inspect` reports are capped at 8 MiB and `diagnose` reports at 4 MiB, both before any stdout write. The `inspect` cap is derived from the worst valid 2 MiB input after JSON escaping, so every input the strict decoder accepts can be inspected; `diagnose` reports are bounded by construction (key text echoed in a path is truncated and escaped). Successful stdout ends with LF. Output write errors and short writes return exit 2.
+- `diagnose` always terminates and, for any readable input the strict decoder rejects, emits a rejection report; excessive JSON nesting is reported as `NESTING_TOO_DEEP` and unpaired surrogate escapes as `INVALID_ESCAPE`. An object key that is not a plain identifier appears in a path as a bracket-quoted ASCII string, e.g. `$.nodes[1]["x.title[0]"]`.
 - Every source ID, title, content field and digest claim remains **unverified local data**, not proof of origin, lineage, visibility, access, or permission. Do not expose private source material to unauthorized readers.
 
 ## Verification gate
