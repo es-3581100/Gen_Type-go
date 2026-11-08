@@ -16,6 +16,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Verify tracked source manifest (integrity only, not authority)
+        run: |
+          python3 -m unittest discover -s tools -p "test_verify_sha256sums.py" -v
+          python3 tools/verify_sha256sums.py
       - name: Standard library only; no external Go module resolution
         env:
           GOPROXY: "off"

@@ -110,6 +110,9 @@ func stableDiagnostic(raw []byte) Diagnostic {
 		if !localID.MatchString(n.ID) {
 			return problem("INVALID_ID", base+".id", "node ID is invalid", "use a valid local node ID")
 		}
+		if n.ParentID != "" && !localID.MatchString(n.ParentID) {
+			return problem("INVALID_ID", base+".parent_id", "parent node ID is invalid", "use a valid local parent ID or an empty root parent")
+		}
 		if _, ok := byID[n.ID]; ok {
 			return problem("DUPLICATE_NODE", base+".id", "node ID is repeated", "use distinct node IDs")
 		}
