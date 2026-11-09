@@ -16,6 +16,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Verify tracked source manifest (integrity only, not authority)
+        run: |
+          python3 -m unittest discover -s tools -p "test_verify_sha256sums.py" -v
+          python3 tools/verify_sha256sums.py
       - name: Standard library only; no external Go module resolution
         env:
           GOPROXY: "off"
@@ -58,3 +62,19 @@ jobs:
             echo 'invalid graph unexpectedly measured' >&2; exit 1
           fi
           test ! -s "$RUNNER_TEMP/stats-invalid.json"
+          # New v0.4 read-only commands.
+          go run ./cmd/gen-type-go inspect --id c testdata/stats_forest.json > "$RUNNER_TEMP/inspect-one.json"
+          go run ./cmd/gen-type-go inspect --id c testdata/stats_forest.json > "$RUNNER_TEMP/inspect-two.json"
+          cmp "$RUNNER_TEMP/inspect-one.json" "$RUNNER_TEMP/inspect-two.json"
+          grep -q '"schema":"gen-type-go/graph-inspection-v0"' "$RUNNER_TEMP/inspect-one.json"
+          grep -q '"ancestors":\["r1","a"\]' "$RUNNER_TEMP/inspect-one.json"
+          go run ./cmd/gen-type-go diagnose testdata/tiny_graph.json > "$RUNNER_TEMP/diag-valid.json"
+          grep -q '"valid":true' "$RUNNER_TEMP/diag-valid.json"
+          if go run ./cmd/gen-type-go diagnose testdata/invalid_duplicate_id.json > "$RUNNER_TEMP/diag-invalid.json"; then
+            echo 'malformed graph unexpectedly accepted' >&2; exit 1
+          fi
+          grep -q '"valid":false' "$RUNNER_TEMP/diag-invalid.json"
+          if go run ./cmd/gen-type-go inspect --id missing testdata/tiny_graph.json > "$RUNNER_TEMP/inspect-missing.json"; then
+            echo 'unknown node unexpectedly inspected' >&2; exit 1
+          fi
+          test ! -s "$RUNNER_TEMP/inspect-missing.json"
